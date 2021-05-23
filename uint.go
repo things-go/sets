@@ -1,0 +1,245 @@
+/*
+Copyright The Kubernetes Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package sets
+
+import (
+	"reflect"
+	"sort"
+)
+
+// Uint is a set of uints, implemented via map[uint]struct{} for minimal memory consumption.
+type Uint map[uint]struct{}
+
+// NewUint creates a Uint from a list of values.
+func NewUint(items ...uint) Uint {
+	ss := Uint{}
+	ss.Insert(items...)
+	return ss
+}
+
+// NewUintFrom creates a Uint from a keys of a map[uint](? extends interface{}).
+// If the value passed in is not actually a map, this will panic.
+func NewUintFrom(theMap interface{}) Uint {
+	v := reflect.ValueOf(theMap)
+	ret := Uint{}
+
+	for _, keyValue := range v.MapKeys() {
+		ret[keyValue.Interface().(uint)] = struct{}{}
+	}
+	return ret
+}
+
+// Insert adds items to the set.
+func (s Uint) Insert(items ...uint) Uint {
+	for _, item := range items {
+		s[item] = struct{}{}
+	}
+	return s
+}
+
+// Delete removes all items from the set.
+func (s Uint) Delete(items ...uint) Uint {
+	for _, item := range items {
+		delete(s, item)
+	}
+	return s
+}
+
+// Contains returns true if and only if item is contained in the set.
+func (s Uint) Contains(item uint) bool {
+	_, contained := s[item]
+	return contained
+}
+
+// ContainsAll returns true if and only if all items are contained in the set.
+func (s Uint) ContainsAll(items ...uint) bool {
+	for _, item := range items {
+		if !s.Contains(item) {
+			return false
+		}
+	}
+	return true
+}
+
+// ContainsAny returns true if any items are contained in the set.
+func (s Uint) ContainsAny(items ...uint) bool {
+	for _, item := range items {
+		if s.Contains(item) {
+			return true
+		}
+	}
+	return false
+}
+
+// Difference returns a set of objects that are not in s2
+// For example:
+// s1 = {a1, a2, a3}
+// s2 = {a1, a2, a4, a5}
+// s1.Difference(s2) = {a3}
+// s2.Difference(s1) = {a4, a5}
+func (s Uint) Difference(s2 Uint) Uint {
+	result := NewUint()
+	for key := range s {
+		if !s2.Contains(key) {
+			result[key] = struct{}{}
+		}
+	}
+	return result
+}
+
+// Union returns a new set which includes items in either s1 or s2.
+// For example:
+// s1 = {a1, a2}
+// s2 = {a3, a4}
+// s1.Union(s2) = {a1, a2, a3, a4}
+// s2.Union(s1) = {a1, a2, a3, a4}
+func (s Uint) Union(s2 Uint) Uint {
+	result := NewUint()
+	for key := range s {
+		result[key] = struct{}{}
+	}
+	for key := range s2 {
+		result[key] = struct{}{}
+	}
+	return result
+}
+
+// Intersection returns a new set which includes the item in BOTH s1 and s2
+// For example:
+// s1 = {a1, a2}
+// s2 = {a2, a3}
+// s1.Intersection(s2) = {a2}
+func (s Uint) Intersection(s2 Uint) Uint {
+	var walk, other Uint
+	result := NewUint()
+	if s.Len() < s2.Len() {
+		walk = s
+		other = s2
+	} else {
+		walk = s2
+		other = s
+	}
+	for key := range walk {
+		if other.Contains(key) {
+			result[key] = struct{}{}
+		}
+	}
+	return result
+}
+
+// Merge adds item from s2 set into s1
+// For example:
+// s1 = {a1, a2}
+// s2 = {a3, a4}
+// s1.Merge(s2) = {a1, a2, a3, a4}
+func (s Uint) Merge(s2 Uint) Uint {
+	for key := range s2 {
+		s[key] = struct{}{}
+	}
+	return s
+}
+
+// IsSuperset returns true if and only if s1 is a superset of s2.
+func (s Uint) IsSuperset(s2 Uint) bool {
+	for item := range s2 {
+		if !s.Contains(item) {
+			return false
+		}
+	}
+	return true
+}
+
+// IsSubset returns true if and only if s1 is a subset of s2.
+func (s Uint) IsSubset(s2 Uint) bool {
+	for item := range s {
+		if !s2.Contains(item) {
+			return false
+		}
+	}
+	return true
+}
+
+// Equal returns true if and only if s1 is equal (as a set) to s2.
+// Two sets are equal if their membership is identical.
+// (In practice, this means same elements, order doesn't matter)
+func (s Uint) Equal(s2 Uint) bool {
+	return len(s) == len(s2) && s.IsSuperset(s2)
+}
+
+type sortableSliceOfUint []uint
+
+func (s sortableSliceOfUint) Len() int           { return len(s) }
+func (s sortableSliceOfUint) Less(i, j int) bool { return lessUint(s[i], s[j]) }
+func (s sortableSliceOfUint) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+
+// List returns the contents as a sorted uint slice.
+func (s Uint) List() []uint {
+	res := make(sortableSliceOfUint, 0, len(s))
+	for key := range s {
+		res = append(res, key)
+	}
+	sort.Sort(res)
+	return res
+}
+
+// UnsortedList returns the slice with contents in random order.
+func (s Uint) UnsortedList() []uint {
+	res := make([]uint, 0, len(s))
+	for key := range s {
+		res = append(res, key)
+	}
+	return res
+}
+
+// Pop Returns a single element from the set.
+func (s Uint) Pop() (uint, bool) {
+	for key := range s {
+		delete(s, key)
+		return key, true
+	}
+	return 0, false
+}
+
+// Len returns the size of the set.
+func (s Uint) Len() int {
+	return len(s)
+}
+
+func lessUint(lhs, rhs uint) bool {
+	return lhs < rhs
+}
+
+// Each traverses the items in the Set, calling the provided function for each
+// set member. Traversal will continue until all items in the Set have been
+// visited, or if the closure returns false.
+func (s Uint) Each(f func(item interface{}) bool) {
+	for item := range s {
+		if !f(item) {
+			break
+		}
+	}
+}
+
+// Clone returns a new Set with a copy of s.
+func (s Uint) Clone() Uint {
+	ns := NewUint()
+	s.Each(func(item interface{}) bool {
+		ns[item.(uint)] = struct{}{}
+		return true
+	})
+	return ns
+}
