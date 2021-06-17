@@ -343,9 +343,9 @@ func TestInt8Merge(t *testing.T) {
 func TestInt8_Each(t *testing.T) {
 	expect := NewInt8(1, 2, 3, 4)
 	s1 := NewInt8(1, 2, 3, 4)
-	s1.Each(func(item interface{}) bool {
-		require.True(t, expect.Contains(item.(int8)))
-		return item.(int8) != 3
+	s1.Each(func(item int8) bool {
+		require.True(t, expect.Contains(item))
+		return item != 3
 	})
 }
 

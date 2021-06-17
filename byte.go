@@ -226,7 +226,7 @@ func lessByte(lhs, rhs byte) bool {
 // Each traverses the items in the Set, calling the provided function for each
 // set member. Traversal will continue until all items in the Set have been
 // visited, or if the closure returns false.
-func (s Byte) Each(f func(item interface{}) bool) {
+func (s Byte) Each(f func(item byte) bool) {
 	for item := range s {
 		if !f(item) {
 			break
@@ -237,8 +237,8 @@ func (s Byte) Each(f func(item interface{}) bool) {
 // Clone returns a new Set with a copy of s.
 func (s Byte) Clone() Byte {
 	ns := NewByte()
-	s.Each(func(item interface{}) bool {
-		ns[item.(byte)] = struct{}{}
+	s.Each(func(item byte) bool {
+		ns[item] = struct{}{}
 		return true
 	})
 	return ns

@@ -344,9 +344,9 @@ func TestInt32Merge(t *testing.T) {
 func TestInt32_Each(t *testing.T) {
 	expect := NewInt32(1, 2, 3, 4)
 	s1 := NewInt32(1, 2, 3, 4)
-	s1.Each(func(item interface{}) bool {
-		require.True(t, expect.Contains(item.(int32)))
-		return item.(int32) != 3
+	s1.Each(func(item int32) bool {
+		require.True(t, expect.Contains(item))
+		return item != 3
 	})
 }
 

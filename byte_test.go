@@ -344,9 +344,9 @@ func TestByteMerge(t *testing.T) {
 func TestByte_Each(t *testing.T) {
 	expect := NewByte(1, 2, 3, 4)
 	s1 := NewByte(1, 2, 3, 4)
-	s1.Each(func(item interface{}) bool {
-		require.True(t, expect.Contains(item.(byte)))
-		return item.(byte) != 3
+	s1.Each(func(item byte) bool {
+		require.True(t, expect.Contains(item))
+		return item != 3
 	})
 }
 

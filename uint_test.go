@@ -343,9 +343,9 @@ func TestUintMerge(t *testing.T) {
 func TestUnt_Each(t *testing.T) {
 	expect := NewUint(1, 2, 3, 4)
 	s1 := NewUint(1, 2, 3, 4)
-	s1.Each(func(item interface{}) bool {
-		require.True(t, expect.Contains(item.(uint)))
-		return item.(uint) != 3
+	s1.Each(func(item uint) bool {
+		require.True(t, expect.Contains(item))
+		return item != 3
 	})
 }
 

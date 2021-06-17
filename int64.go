@@ -226,7 +226,7 @@ func lessInt64(lhs, rhs int64) bool {
 // Each traverses the items in the Set, calling the provided function for each
 // set member. Traversal will continue until all items in the Set have been
 // visited, or if the closure returns false.
-func (s Int64) Each(f func(item interface{}) bool) {
+func (s Int64) Each(f func(item int64) bool) {
 	for item := range s {
 		if !f(item) {
 			break
@@ -237,8 +237,8 @@ func (s Int64) Each(f func(item interface{}) bool) {
 // Clone returns a new Set with a copy of s.
 func (s Int64) Clone() Int64 {
 	ns := NewInt64()
-	s.Each(func(item interface{}) bool {
-		ns[item.(int64)] = struct{}{}
+	s.Each(func(item int64) bool {
+		ns[item] = struct{}{}
 		return true
 	})
 	return ns

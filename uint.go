@@ -226,7 +226,7 @@ func lessUint(lhs, rhs uint) bool {
 // Each traverses the items in the Set, calling the provided function for each
 // set member. Traversal will continue until all items in the Set have been
 // visited, or if the closure returns false.
-func (s Uint) Each(f func(item interface{}) bool) {
+func (s Uint) Each(f func(item uint) bool) {
 	for item := range s {
 		if !f(item) {
 			break
@@ -237,8 +237,8 @@ func (s Uint) Each(f func(item interface{}) bool) {
 // Clone returns a new Set with a copy of s.
 func (s Uint) Clone() Uint {
 	ns := NewUint()
-	s.Each(func(item interface{}) bool {
-		ns[item.(uint)] = struct{}{}
+	s.Each(func(item uint) bool {
+		ns[item] = struct{}{}
 		return true
 	})
 	return ns

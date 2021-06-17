@@ -344,9 +344,9 @@ func TestUint16Merge(t *testing.T) {
 func TestUnt16_Each(t *testing.T) {
 	expect := NewUint16(1, 2, 3, 4)
 	s1 := NewUint16(1, 2, 3, 4)
-	s1.Each(func(item interface{}) bool {
-		require.True(t, expect.Contains(item.(uint16)))
-		return item.(uint16) != 3
+	s1.Each(func(item uint16) bool {
+		require.True(t, expect.Contains(item))
+		return item != 3
 	})
 }
 

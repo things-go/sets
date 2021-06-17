@@ -344,9 +344,9 @@ func TestStringMerge(t *testing.T) {
 func TestString_Each(t *testing.T) {
 	expect := NewString("1", "2", "3", "4")
 	s1 := NewString("1", "2", "3", "4")
-	s1.Each(func(item interface{}) bool {
-		require.True(t, expect.Contains(item.(string)))
-		return item.(string) != "3"
+	s1.Each(func(item string) bool {
+		require.True(t, expect.Contains(item))
+		return item != "3"
 	})
 }
 

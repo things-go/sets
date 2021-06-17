@@ -226,7 +226,7 @@ func lessString(lhs, rhs string) bool {
 // Each traverses the items in the Set, calling the provided function for each
 // set member. Traversal will continue until all items in the Set have been
 // visited, or if the closure returns false.
-func (s String) Each(f func(item interface{}) bool) {
+func (s String) Each(f func(item string) bool) {
 	for item := range s {
 		if !f(item) {
 			break
@@ -237,8 +237,8 @@ func (s String) Each(f func(item interface{}) bool) {
 // Clone returns a new Set with a copy of s.
 func (s String) Clone() String {
 	ns := NewString()
-	s.Each(func(item interface{}) bool {
-		ns[item.(string)] = struct{}{}
+	s.Each(func(item string) bool {
+		ns[item] = struct{}{}
 		return true
 	})
 	return ns

@@ -343,9 +343,9 @@ func TestInt64Merge(t *testing.T) {
 func TestInt64_Each(t *testing.T) {
 	expect := NewInt64(1, 2, 3, 4)
 	s1 := NewInt64(1, 2, 3, 4)
-	s1.Each(func(item interface{}) bool {
-		require.True(t, expect.Contains(item.(int64)))
-		return item.(int64) != 3
+	s1.Each(func(item int64) bool {
+		require.True(t, expect.Contains(item))
+		return item != 3
 	})
 }
 

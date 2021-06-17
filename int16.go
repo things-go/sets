@@ -226,7 +226,7 @@ func lessInt16(lhs, rhs int16) bool {
 // Each traverses the items in the Set, calling the provided function for each
 // set member. Traversal will continue until all items in the Set have been
 // visited, or if the closure returns false.
-func (s Int16) Each(f func(item interface{}) bool) {
+func (s Int16) Each(f func(item int16) bool) {
 	for item := range s {
 		if !f(item) {
 			break
@@ -237,8 +237,8 @@ func (s Int16) Each(f func(item interface{}) bool) {
 // Clone returns a new Set with a copy of s.
 func (s Int16) Clone() Int16 {
 	ns := NewInt16()
-	s.Each(func(item interface{}) bool {
-		ns[item.(int16)] = struct{}{}
+	s.Each(func(item int16) bool {
+		ns[item] = struct{}{}
 		return true
 	})
 	return ns
