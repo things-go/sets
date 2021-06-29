@@ -84,7 +84,7 @@ func TestSet(t *testing.T) {
 	s2 = NewSetFrom(map[interface{}]interface{}{1: "1", 2: "2", 3: "3"})
 	s2.UnsortedList()
 
-	s3 := New(WithComparator(&myInt{}))
+	s3 := New(WithComparator(CompareMyInt))
 	s3.Insert([]interface{}{15, 19, 12, 8, 13}...)
 
 	lists := s3.List()
@@ -93,10 +93,8 @@ func TestSet(t *testing.T) {
 	}
 }
 
-type myInt struct{}
-
 // Compare returns reverse order.
-func (i myInt) Compare(v1, v2 interface{}) int {
+func CompareMyInt(v1, v2 interface{}) int {
 	i1, i2 := v1.(int), v2.(int)
 	if i1 < i2 {
 		return 1

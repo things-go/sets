@@ -21,7 +21,7 @@ func WithItems(items ...interface{}) Option {
 	}
 }
 
-// WithComparator with user's Comparator for sort
+// WithComparator with user's Comparator only for sort
 func WithComparator(cmp Comparator) Option {
 	return func(s Set) {
 		s.cmp = cmp
@@ -186,7 +186,7 @@ func (s Set) IsSubset(s2 Set) bool {
 // List returns the contents as a sorted slice.
 func (s Set) List() []interface{} {
 	res := s.UnsortedList()
-	Sort(res, s.cmp)
+	NewContainer(res, s.cmp).Sort()
 	return res
 }
 

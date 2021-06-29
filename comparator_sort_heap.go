@@ -28,8 +28,18 @@ var (
 type Container struct {
 	noCopy  noCopy // nolint: structcheck,unused
 	Items   []interface{}
-	Cmp     Comparator
-	Reverse bool
+	compare Comparator
+	reverse bool
+}
+
+// NewContainer new container with value slice and Comparator
+func NewContainer(values []interface{}, c Comparator) *Container {
+	return &Container{Items: values, compare: c}
+}
+
+// SetComparator set Container comparator
+func (sf *Container) SetComparator(c Comparator) {
+	sf.compare = c
 }
 
 // Len implement heap.Interface.
@@ -44,14 +54,10 @@ func (sf *Container) Swap(i, j int) {
 
 // Less implement heap.Interface.
 func (sf *Container) Less(i, j int) bool {
-	if sf.Reverse {
+	if sf.reverse {
 		i, j = j, i
 	}
-
-	if sf.Cmp != nil {
-		return sf.Cmp.Compare(sf.Items[i], sf.Items[j]) < 0
-	}
-	return Compare(sf.Items[i], sf.Items[j]) < 0
+	return sf.Compare(sf.Items[i], sf.Items[j]) < 0
 }
 
 // Push implement heap.Interface.
@@ -69,18 +75,22 @@ func (sf *Container) Pop() interface{} {
 	return x
 }
 
-// Sort sorts values into ascending sequence according to their natural ordering,
-// or according to the provided comparator.
-func (sf *Container) Sort() {
-	sort.Sort(sf)
+// Reverse returns the reverse order for data.
+func (sf *Container) Reverse() *Container {
+	sf.reverse = true
+	return sf
+}
+
+// Compare compares its two arguments use compare if exist
+func (sf *Container) Compare(v1, v2 interface{}) int {
+	if sf.compare == nil {
+		return Compare(v1, v2)
+	}
+	return sf.compare(v1, v2)
 }
 
 // Sort sorts values into ascending sequence according to their natural ordering,
 // or according to the provided comparator.
-func Sort(values []interface{}, c Comparator, reverse ...bool) {
-	rev := false
-	if len(reverse) > 0 {
-		rev = reverse[0]
-	}
-	sort.Sort(&Container{Items: values, Cmp: c, Reverse: rev})
+func (sf *Container) Sort() {
+	sort.Sort(sf)
 }
