@@ -97,10 +97,10 @@ func TestSet(t *testing.T) {
 func CompareMyInt(v1, v2 interface{}) int {
 	i1, i2 := v1.(int), v2.(int)
 	if i1 < i2 {
-		return 1
+		return -1
 	}
 	if i1 > i2 {
-		return -1
+		return 1
 	}
 	return 0
 }
@@ -224,9 +224,9 @@ func TestSetEquals(t *testing.T) {
 
 func TestUnion(t *testing.T) {
 	tests := []struct {
-		s1       Set
-		s2       Set
-		expected Set
+		s1       *Set
+		s2       *Set
+		expected *Set
 	}{
 		{
 			New(WithItems("1", "2", "3", "4")),
@@ -264,9 +264,9 @@ func TestUnion(t *testing.T) {
 
 func TestIntersection(t *testing.T) {
 	tests := []struct {
-		s1       Set
-		s2       Set
-		expected Set
+		s1       *Set
+		s2       *Set
+		expected *Set
 	}{
 		{
 			New(WithItems("1", "2", "3", "4")),
@@ -310,9 +310,9 @@ func TestIntersection(t *testing.T) {
 
 func TestMerge(t *testing.T) {
 	tests := []struct {
-		s1       Set
-		s2       Set
-		expected Set
+		s1       *Set
+		s2       *Set
+		expected *Set
 	}{
 		{
 			New(WithItems("1", "2", "3", "4")),
