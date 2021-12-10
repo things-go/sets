@@ -152,7 +152,7 @@ func Compare(v1, v2 interface{}) int {
 		if isBothTime {
 			return timeCmpRet
 		}
-		panic("please define a customized comparator.Comparator for your struct")
+		panic("please define a customized sets.Comparator for your struct")
 	default:
 		panic(fmt.Sprintf("type '%s' can't be compared,please define a customized comparator.Comparator for your struct", k1))
 	}
