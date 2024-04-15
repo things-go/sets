@@ -12,7 +12,7 @@ func New[T comparable](items ...T) Set[T] {
 
 // NewFrom creates a T from a keys of a map[T](? extends any).
 // If the value passed in is not actually a map, this will panic.
-func NewFrom[T comparable, M ~map[T]any](m M) Set[T] {
+func NewFrom[T comparable, V any, M ~map[T]V](m M) Set[T] {
 	ret := Set[T]{}
 	for k := range m {
 		ret[k] = struct{}{}
