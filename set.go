@@ -4,16 +4,20 @@ package sets
 // implemented via map[T]struct{} for minimal memory consumption.
 type Set[T comparable] map[T]struct{}
 
+func newSet[T comparable](cap int) Set[T] {
+	return make(Set[T], cap)
+}
+
 // New creates a T from a list of values.
 func New[T comparable](items ...T) Set[T] {
-	ss := Set[T]{}
-	return ss.Insert(items...)
+	ret := newSet[T](len(items))
+	return ret.Insert(items...)
 }
 
 // NewFrom creates a T from a keys of a map[T](? extends any).
 // If the value passed in is not actually a map, this will panic.
 func NewFrom[T comparable, V any, M ~map[T]V](m M) Set[T] {
-	ret := Set[T]{}
+	ret := newSet[T](len(m))
 	for k := range m {
 		ret[k] = struct{}{}
 	}
@@ -69,7 +73,7 @@ func (s Set[T]) ContainsAny(items ...T) bool {
 // s1.Difference(s2) = {a3}
 // s2.Difference(s1) = {a4, a5}.
 func (s Set[T]) Difference(s2 Set[T]) Set[T] {
-	result := New[T]()
+	result := newSet[T](min(len(s), len(s2)))
 	for key := range s {
 		if !s2.Contains(key) {
 			result[key] = struct{}{}
@@ -85,7 +89,7 @@ func (s Set[T]) Difference(s2 Set[T]) Set[T] {
 // s1.Union(s2) = {a1, a2, a3, a4}
 // s2.Union(s1) = {a1, a2, a3, a4}.
 func (s Set[T]) Union(s2 Set[T]) Set[T] {
-	result := New[T]()
+	result := newSet[T](len(s) + len(s2))
 	for key := range s {
 		result[key] = struct{}{}
 	}
@@ -102,7 +106,7 @@ func (s Set[T]) Union(s2 Set[T]) Set[T] {
 // s1.Intersection(s2) = {a2}.
 func (s Set[T]) Intersection(s2 Set[T]) Set[T] {
 	var walk, other Set[T]
-	result := New[T]()
+
 	if s.Len() < s2.Len() {
 		walk = s
 		other = s2
@@ -110,12 +114,13 @@ func (s Set[T]) Intersection(s2 Set[T]) Set[T] {
 		walk = s2
 		other = s
 	}
+	ret := newSet[T](min(len(s), len(s2)))
 	for key := range walk {
 		if other.Contains(key) {
-			result[key] = struct{}{}
+			ret[key] = struct{}{}
 		}
 	}
-	return result
+	return ret
 }
 
 // Merge is like Union, however it modifies the current set it's applied on
@@ -195,10 +200,5 @@ func (s Set[T]) Each(f func(item T) bool) {
 
 // Clone returns a new Set with a copy of s.
 func (s Set[T]) Clone() Set[T] {
-	ns := New[T]()
-	s.Each(func(item T) bool {
-		ns[item] = struct{}{}
-		return true
-	})
-	return ns
+	return NewFrom(s)
 }
