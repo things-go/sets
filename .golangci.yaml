@@ -11,8 +11,6 @@ linters-settings:
       - github.com/sirupsen/logrus: "logging is allowed only by logutils.Log"
   exhaustive:
     default-signifies-exhaustive: false
-  gci:
-    local-prefixes: github.com/golangci/golangci-lint
   goconst:
     min-len: 2
     min-occurrences: 2
@@ -44,7 +42,7 @@ linters-settings:
           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Errorf
           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Warnf
-#          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Infof
+  #          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Infof
 
   lll:
     line-length: 120
@@ -71,18 +69,20 @@ linters-settings:
 
 linters:
   disable-all: true
+  gci:
+    sections: github.com/golangci/golangci-lint
   enable:
-#    - bodyclose
-    - deadcode
+    #    - bodyclose
+    # - deadcode
     - depguard
     - dogsled
     - errcheck
     - exhaustive
     - goconst
-#    - gocritic
+    #    - gocritic
     - gofmt
     - goimports
-#    - golint
+    #    - golint
     - goprintffuncname
     - gosimple
     - govet
@@ -90,18 +90,18 @@ linters:
     - lll
     - misspell
     - nakedret
-#    - noctx
+    #    - noctx
     - nolintlint
-#    - rowserrcheck
-#    - scopelint
+    #    - rowserrcheck
+    #    - scopelint
     - staticcheck
-#    - structcheck
+    #    - structcheck
     - stylecheck
     - typecheck
     - unconvert
-#    - unparam
+    #    - unparam
     - unused
-    - varcheck
+    # - varcheck
     - whitespace
   #  - interfacer
   #  - gosec
@@ -136,11 +136,10 @@ issues:
     - linters:
         - gocritic
       text: "unnecessaryDefer:"
-
-run:
-#  go: '1.18
-  skip-dirs:
+  exclude-dirs:
     - .github
+run:
+  #  go: '1.18
 
 service:
   golangci-lint-version: 1.30.x # use the fixed version to not introduce new linters unexpectedly
