@@ -1,22 +1,9 @@
-/*
-Copyright 2014 The Kubernetes Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package sets
 
 import (
+	"reflect"
+	"slices"
+	"sort"
 	"testing"
 )
 
@@ -124,20 +111,94 @@ func TestSetList(t *testing.T) {
 func TestSetDifference(t *testing.T) {
 	a := New(1, 2, 3)
 	b := New(1, 2, 4, 5)
-	c := a.Difference(b)
-	d := b.Difference(a)
-	if len(c) != 1 {
-		t.Errorf("Expected len=1: %d", len(c))
-	}
-	if !c.Contains(3) {
-		t.Errorf("Unexpected contents: %#v", c.List())
-	}
-	if len(d) != 2 {
-		t.Errorf("Expected len=2: %d", len(d))
-	}
-	if !d.Contains(4) || !d.Contains(5) {
-		t.Errorf("Unexpected contents: %#v", d.List())
-	}
+
+	t.Run("set", func(t *testing.T) {
+		c := a.Difference(b)
+		d := b.Difference(a)
+		if len(c) != 1 {
+			t.Errorf("Expected len=1: %d", len(c))
+		}
+		if !c.Contains(3) {
+			t.Errorf("Unexpected contents: %#v", c.List())
+		}
+		if len(d) != 2 {
+			t.Errorf("Expected len=2: %d", len(d))
+		}
+		if !d.Contains(4) || !d.Contains(5) {
+			t.Errorf("Unexpected contents: %#v", d.List())
+		}
+	})
+
+	t.Run("slice", func(t *testing.T) {
+		c := a.DifferenceSlice(b)
+		d := b.DifferenceSlice(a)
+		if len(c) != 1 {
+			t.Errorf("Expected len=1: %d", len(c))
+		}
+		if !slices.Contains(c, 3) {
+			t.Errorf("Unexpected contents: %#v", c)
+		}
+		if len(d) != 2 {
+			t.Errorf("Expected len=2: %d", len(d))
+		}
+		if !slices.Contains(d, 4) || !slices.Contains(d, 5) {
+			t.Errorf("Unexpected contents: %#v", d)
+		}
+	})
+}
+
+func TestSetDiff(t *testing.T) {
+	t.Run("set", func(t *testing.T) {
+		a := New(1, 3, 5, 7)
+		b := New(3, 4, 5, 6)
+
+		added, removed, remained := a.Diff(b)
+		wantAdded := Set[int]{
+			4: {},
+			6: {},
+		}
+		if !reflect.DeepEqual(added, wantAdded) {
+			t.Errorf("Expected %#v, Got: %#v", wantAdded, added)
+		}
+		wantRemoved := Set[int]{
+			1: {},
+			7: {},
+		}
+		if !reflect.DeepEqual(removed, wantRemoved) {
+			t.Errorf("Expected %v, Got: %v", wantRemoved, removed)
+		}
+		wantRemained := Set[int]{
+			3: {},
+			5: {},
+		}
+		if !reflect.DeepEqual(remained, wantRemained) {
+			t.Errorf("Expected %v, Got: %v", wantRemained, remained)
+		}
+	})
+	t.Run("slice", func(t *testing.T) {
+		a := New(1, 3, 5, 7)
+		b := New(3, 4, 5, 6)
+
+		added, removed, remained := a.DiffSlice(b)
+		sort.Ints(added)
+		sort.Ints(removed)
+		sort.Ints(remained)
+
+		wantAdded := []int{4, 6}
+		if !reflect.DeepEqual(added, wantAdded) {
+			t.Errorf("Expected %#v, Got: %#v", wantAdded, added)
+		}
+
+		wantRemoved := []int{1, 7}
+		if !reflect.DeepEqual(removed, wantRemoved) {
+			t.Errorf("Expected %v, Got: %v", wantRemoved, removed)
+		}
+
+		wantRemained := []int{3, 5}
+		if !reflect.DeepEqual(remained, wantRemained) {
+			t.Errorf("Expected %v, Got: %v", wantRemained, remained)
+		}
+	})
 }
 
 func TestSetHasAny(t *testing.T) {
@@ -235,13 +296,21 @@ func TestUnion(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		// set
 		union := test.s1.Union(test.s2)
 		if union.Len() != test.expected.Len() {
 			t.Errorf("Expected union.Len()=%d but got %d", test.expected.Len(), union.Len())
 		}
-
 		if !union.Equal(test.expected) {
 			t.Errorf("Expected union.Equal(expected) but not true.  union:%v expected:%v", union.List(), test.expected.List())
+		}
+		// slice
+		unionSlices := test.s1.UnionSlice(test.s2)
+		if len(unionSlices) != test.expected.Len() {
+			t.Errorf("Expected UnionSlices length=%d but got %d", test.expected.Len(), len(unionSlices))
+		}
+		if !New(unionSlices...).Equal(test.expected) {
+			t.Errorf("Expected union.Equal(expected) but not true.  union:%v expected:%v", unionSlices, test.expected.List())
 		}
 	}
 }
@@ -280,14 +349,24 @@ func TestIntersection(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		// sets
 		intersection := test.s1.Intersection(test.s2)
 		if intersection.Len() != test.expected.Len() {
 			t.Errorf("Expected intersection.Len()=%d but got %d", test.expected.Len(), intersection.Len())
 		}
-
 		if !intersection.Equal(test.expected) {
 			t.Errorf("Expected intersection.Equal(expected) but not true.  intersection:%v expected:%v",
 				intersection.List(), test.expected.List())
+		}
+
+		// slice
+		intersectionSlice := test.s1.IntersectionSlice(test.s2)
+		if len(intersectionSlice) != test.expected.Len() {
+			t.Errorf("Expected IntersectionSlice length =%d but got %d", test.expected.Len(), len(intersectionSlice))
+		}
+		if !New(intersectionSlice...).Equal(test.expected) {
+			t.Errorf("Expected intersection.Equal(expected) but not true.  intersection:%v expected:%v",
+				intersectionSlice, test.expected.List())
 		}
 	}
 }
