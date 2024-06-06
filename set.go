@@ -73,7 +73,7 @@ func (s Set[T]) ContainsAny(items ...T) bool {
 // s1.Difference(s2) = {a3}
 // s2.Difference(s1) = {a4, a5}.
 func (s Set[T]) Difference(s2 Set[T]) Set[T] {
-	result := newSet[T](min(len(s), len(s2)))
+	result := newSet[T](len(s))
 	for key := range s {
 		if !s2.Contains(key) {
 			result[key] = struct{}{}
@@ -89,7 +89,7 @@ func (s Set[T]) Difference(s2 Set[T]) Set[T] {
 // s1.Difference(s2) = {a3}
 // s2.Difference(s1) = {a4, a5}.
 func (s Set[T]) DifferenceSlice(s2 Set[T]) []T {
-	result := make([]T, 0, (min(len(s), len(s2))))
+	result := make([]T, 0, len(s))
 	for key := range s {
 		if !s2.Contains(key) {
 			result = append(result, key)
@@ -191,8 +191,8 @@ func (s Set[T]) IntersectionSlice(s2 Set[T]) []T {
 // removed = {a1, a7}
 // remained = {a3, a6}
 func (s Set[T]) Diff(s2 Set[T]) (added, removed, remained Set[T]) {
-	removed = newSet[T](min(len(s), len(s2)))
-	added = newSet[T](min(len(s), len(s2)))
+	removed = newSet[T](len(s))
+	added = newSet[T](len(s2))
 	remained = newSet[T](len(s))
 	for key := range s {
 		if s2.Contains(key) {
@@ -218,8 +218,8 @@ func (s Set[T]) Diff(s2 Set[T]) (added, removed, remained Set[T]) {
 // removed = {a1, a7}
 // remained = {a3, a6}
 func (s Set[T]) DiffSlice(s2 Set[T]) (added, removed, remained []T) {
-	removed = make([]T, 0, min(len(s), len(s2)))
-	added = make([]T, 0, min(len(s), len(s2)))
+	removed = make([]T, 0, len(s))
+	added = make([]T, 0, len(s2))
 	remained = make([]T, 0, len(s))
 	for key := range s {
 		if s2.Contains(key) {
