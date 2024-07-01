@@ -6,18 +6,13 @@ on:
       - "**.md"
 
 jobs:
-  golangci:
-    name: Golangci-Lint
+  golang-ci:
+    name: GolangCi-Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.6
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.22.x"
-          cache: false
+      - uses: actions/checkout@v4
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v6
-        with:
+        with: # BUG: typecheck error when enable all
           args: --disable-all -E goimports,misspell,whitespace
           version: latest
