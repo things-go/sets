@@ -1,6 +1,6 @@
 # sets
 
-support`interface{}` which implement Comparator interface and builtin type.
+support`T` which implement comparable interface and builtin type.
 
 [![Go.Dev reference](https://img.shields.io/badge/go.dev-reference-blue?logo=go&logoColor=white)](https://pkg.go.dev/github.com/things-go/sets?tab=doc)
 [![codecov](https://codecov.io/gh/things-go/sets/branch/master/graph/badge.svg)](https://codecov.io/gh/things-go/sets)
